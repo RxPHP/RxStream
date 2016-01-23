@@ -1,0 +1,42 @@
+{
+  "name": "rx/stream",
+  "type": "library",
+  "description": "Async Stream for RxPHP",
+  "keywords": [
+    "rxphp",
+    "reactivex",
+    "react",
+    "reactphp",
+    "stream",
+    "rx.php"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "David Dan",
+      "email": "davidwdan@gmail.com",
+      "role": "Developer"
+    },
+    {
+      "name": "Matt Bonneau",
+      "email": "matt@bonneau.net",
+      "role": "Developer"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Rx\\React\\": "src/"
+    }
+  },
+  "require": {
+    "voryx/event-loop": "^0.2.0",
+    "react/stream": "^0.4.3",
+    "asm89/rx.php": "dev-master"
+  },
+  "repositories": [
+    {
+      "type": "git",
+      "url": "https://github.com/voryx/Rx.PHP.git"
+    }
+  ]
+}
