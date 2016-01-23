@@ -25,9 +25,9 @@ foreach ($locations as $location) {
 //RxPHP test files
 foreach ($locations as $location) {
 
-    $file = $location . "vendor/asm89/rx.php/test/helper-functions.php";
+    $file = $location . "vendor/reactivex/rxphp/test/helper-functions.php";
     if (file_exists($file)) {
-        $loader->add('Rx', $location . "vendor/asm89/rx.php/test/");
+        $loader->add('Rx', $location . "vendor/reactivex/rxphp/test/");
         require_once $file;
         break;
     }
