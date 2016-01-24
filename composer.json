@@ -31,6 +31,7 @@
   "require": {
     "voryx/event-loop": "^0.2.0",
     "react/stream": "^0.4.3",
-    "reactivex/rxphp": "^1.0.0"
+    "reactivex/rxphp": "^1.0.0",
+    "rx/operator-extras": "^0.1.0"
   }
 }

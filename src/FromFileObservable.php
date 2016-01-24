@@ -4,9 +4,9 @@ namespace Rx\React;
 
 use React\Stream\Stream;
 use Rx\Disposable\CallbackDisposable;
+use Rx\Extra\Operator\CutOperator;
 use Rx\Observable;
 use Rx\ObserverInterface;
-use Rx\React\Operator\CutOperator;
 use Rx\SchedulerInterface;
 
 class FromFileObservable extends Observable
