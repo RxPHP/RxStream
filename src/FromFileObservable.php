@@ -2,6 +2,7 @@
 
 namespace Rx\React;
 
+use React\EventLoop\LoopInterface;
 use React\Stream\Stream;
 use Rx\Disposable\CallbackDisposable;
 use Rx\Extra\Operator\CutOperator;
@@ -17,11 +18,15 @@ class FromFileObservable extends Observable
     /** @var  string */
     private $mode;
 
+    /** @var LoopInterface */
+    private $loop;
 
-    public function __construct($fileName, $mode = "r")
+    public function __construct($fileName, $mode = "r", LoopInterface $loop = null)
     {
         $this->fileName = $fileName;
         $this->mode     = $mode;
+        $this->loop     = $loop ?: \EventLoop\getLoop();
+
     }
 
     /**
@@ -33,7 +38,7 @@ class FromFileObservable extends Observable
     {
 
         try {
-            $stream = new Stream(fopen($this->fileName, $this->mode), \EventLoop\getLoop());
+            $stream = new Stream(fopen($this->fileName, $this->mode), $this->loop);
 
             $stream->on('data', function ($data) use ($observer) {
                 $observer->onNext($data);
