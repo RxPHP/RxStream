@@ -6,9 +6,7 @@ $source = new \Rx\React\FromFileObservable(__DIR__ . "/../test.csv");
 
 $source
     ->cut()
-    ->map(function ($row) {
-        return str_getcsv($row);
-    })
+    ->map("str_getcsv")
     ->toArray()
     ->subscribe(new \Rx\Observer\CallbackObserver(
         function (array $array) {

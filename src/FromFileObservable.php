@@ -26,7 +26,6 @@ class FromFileObservable extends Observable
         $this->fileName = $fileName;
         $this->mode     = $mode;
         $this->loop     = $loop ?: \EventLoop\getLoop();
-
     }
 
     /**
@@ -40,27 +39,17 @@ class FromFileObservable extends Observable
         try {
             $stream = new Stream(fopen($this->fileName, $this->mode), $this->loop);
 
-            $stream->on('data', function ($data) use ($observer) {
-                $observer->onNext($data);
-            });
-
-            $stream->on('error', function ($error) use ($observer) {
-                $e = new \Exception($error);
-                $observer->onError($e);
-            });
-
-            $stream->on('close', function () use ($observer) {
-                $observer->onCompleted();
-            });
-
-            return new CallbackDisposable(function () use ($stream) {
-                $stream->close();
-            });
+            return (new StreamSubject($stream))->subscribe($observer, $scheduler);
 
         } catch (\Exception $e) {
             $observer->onError($e);
-        }
 
+            return new CallbackDisposable(function () use (&$stream) {
+                if ($stream instanceof Stream) {
+                    $stream->close();
+                }
+            });
+        }
     }
 
     /**

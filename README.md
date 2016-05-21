@@ -13,11 +13,8 @@ This library is a wrapper around the [ReactPHP](https://github.com/reactphp/stre
     $source = new \Rx\React\FromFileObservable("example.csv");
     
     $source
-        ->cut()
-        ->map(function ($row) {
-            //Convert csv row to an array
-            return str_getcsv($row);
-        })
+        ->cut() //Cut the stream by PHP_EOL
+        ->map('str_getcsv') //Convert csv row to an array
         ->map(function (array $row) {
             //Strip numbers from the first field
             $row[0] = preg_replace('/\d+/u', '', $row[0]);
@@ -35,4 +32,24 @@ This library is a wrapper around the [ReactPHP](https://github.com/reactphp/stre
             }
         ));
     
+```
+
+### Read and Write to File
+
+
+```PHP
+
+$source = new \Rx\React\FromFileObservable("source.txt");
+$dest   = new \Rx\React\ToFileObserver("dest.txt");
+
+$source
+    ->cut()
+    ->filter(function ($row) {
+        return strpos($row, 'foo');
+    })
+    ->map(function ($row) {
+        return $row . 'bar';
+    })
+    ->subscribe($dest);
+
 ```
