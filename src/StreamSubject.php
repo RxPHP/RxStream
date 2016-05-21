@@ -2,7 +2,10 @@
 
 namespace Rx\React;
 
+use React\EventLoop\LoopInterface;
 use React\Stream\Stream;
+use Rx\Disposable\BinaryDisposable;
+use Rx\Disposable\CallbackDisposable;
 use Rx\ObserverInterface;
 use Rx\Subject\Subject;
 
@@ -12,10 +15,21 @@ class StreamSubject extends Subject
     /** @var \React\Stream\Stream */
     private $stream;
 
-    public function __construct(Stream $stream)
+    /**
+     * StreamSubject constructor.
+     *
+     * @param resource $resource
+     * @param LoopInterface|null $loop
+     */
+    public function __construct($resource, LoopInterface $loop = null)
     {
-        $this->stream = $stream;
+
+        $loop = $loop ?: \EventLoop\getLoop();
+
+        $this->stream = new Stream($resource, $loop);
+
     }
+
 
     public function onNext($data)
     {
@@ -25,21 +39,22 @@ class StreamSubject extends Subject
         }
 
         $this->stream->write($data);
-        
+
+        //this will probably get stuck in a loop, not sure if I need it or not
         parent::onNext($data);
 
     }
 
     public function onCompleted()
     {
-        $this->stream->close();
-        
+
+        $this->stream->end();
+
         parent::onCompleted();
     }
 
     public function subscribe(ObserverInterface $observer, $scheduler = null)
     {
-        $disposable = parent::subscribe($observer, $scheduler);
 
         $this->stream->on('data', function ($data) use ($observer) {
             $observer->onNext($data);
@@ -54,14 +69,22 @@ class StreamSubject extends Subject
             $observer->onCompleted();
         });
 
-        return $disposable;
+        $disposable = parent::subscribe($observer, $scheduler);
+
+        return new BinaryDisposable($disposable, new CallbackDisposable(function () use ($observer) {
+            $this->removeObserver($observer);
+            $this->dispose();
+        }));
     }
 
     public function dispose()
     {
-        parent::dispose();
 
-        $this->stream->close();
+        if (!$this->hasObservers()) {
+            parent::dispose();
+            $this->stream->end();
+        };
+
     }
 
     /**

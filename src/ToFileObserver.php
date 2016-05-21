@@ -18,9 +18,8 @@ class ToFileObserver extends StreamSubject
     public function __construct($fileName, LoopInterface $loop = null)
     {
 
-        $loop   = $loop ?: \EventLoop\getLoop();
-        $stream = new Stream(fopen($fileName, 'w'), $loop);
+        $loop = $loop ?: \EventLoop\getLoop();
 
-        parent::__construct($stream);
+        parent::__construct(fopen($fileName, 'w'), $loop);
     }
 }

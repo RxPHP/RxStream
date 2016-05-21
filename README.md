@@ -53,3 +53,17 @@ $source
     ->subscribe($dest);
 
 ```
+
+### Stream - echo example
+
+```PHP
+
+$read  = new \Rx\React\StreamSubject(STDIN);
+
+$read
+    ->takeWhile(function ($x) {
+        return trim($x) != 15;
+    })
+    ->subscribe(new \Rx\React\StreamSubject(STDOUT));
+    
+```    

@@ -37,9 +37,9 @@ class FromFileObservable extends Observable
     {
 
         try {
-            $stream = new Stream(fopen($this->fileName, $this->mode), $this->loop);
+            $stream = new StreamSubject(fopen($this->fileName, $this->mode), $this->loop);
 
-            return (new StreamSubject($stream))->subscribe($observer, $scheduler);
+            return $stream->subscribe($observer, $scheduler);
 
         } catch (\Exception $e) {
             $observer->onError($e);

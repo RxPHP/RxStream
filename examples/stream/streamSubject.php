@@ -2,10 +2,7 @@
 
 include __DIR__ . "/../../vendor/autoload.php";
 
-
-$stream = new \React\Stream\Stream(fopen(__DIR__ . "/../test2.csv", 'r+w'), \EventLoop\getLoop());
-
-$fileSubject = new \Rx\React\StreamSubject($stream);
+$fileSubject = new \Rx\React\StreamSubject(fopen(__DIR__ . "/../test2.csv", 'r+w'));
 
 $fileSubject
     ->take(1)
