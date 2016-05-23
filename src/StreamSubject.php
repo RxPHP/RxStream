@@ -30,7 +30,6 @@ class StreamSubject extends Subject
 
     }
 
-
     public function onNext($data)
     {
 
@@ -39,9 +38,6 @@ class StreamSubject extends Subject
         }
 
         $this->stream->write($data);
-
-        //this will probably get stuck in a loop, not sure if I need it or not
-        parent::onNext($data);
 
     }
 
