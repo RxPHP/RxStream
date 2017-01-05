@@ -2,13 +2,13 @@
 
 namespace Rx\React;
 
-use React\EventLoop\LoopInterface;
 use React\Stream\Stream;
 use Rx\Disposable\CallbackDisposable;
-use Rx\Extra\Operator\CutOperator;
+use Rx\DisposableInterface;
+use Rx\Operator\CutOperator;
 use Rx\Observable;
 use Rx\ObserverInterface;
-use Rx\SchedulerInterface;
+
 
 class FromFileObservable extends Observable
 {
@@ -18,28 +18,23 @@ class FromFileObservable extends Observable
     /** @var  string */
     private $mode;
 
-    /** @var LoopInterface */
-    private $loop;
-
-    public function __construct($fileName, $mode = "r", LoopInterface $loop = null)
+    public function __construct($fileName, $mode = 'r')
     {
         $this->fileName = $fileName;
         $this->mode     = $mode;
-        $this->loop     = $loop ?: \EventLoop\getLoop();
     }
 
     /**
      * @param ObserverInterface $observer
-     * @param SchedulerInterface|null $scheduler
      * @return \Rx\Disposable\CompositeDisposable|\Rx\DisposableInterface
      */
-    public function subscribe(ObserverInterface $observer, SchedulerInterface $scheduler = null)
+    public function _subscribe(ObserverInterface $observer): DisposableInterface
     {
 
         try {
-            $stream = new StreamSubject(fopen($this->fileName, $this->mode), $this->loop);
+            $stream = new StreamSubject(fopen($this->fileName, $this->mode));
 
-            return $stream->subscribe($observer, $scheduler);
+            return $stream->subscribe($observer);
 
         } catch (\Exception $e) {
             $observer->onError($e);

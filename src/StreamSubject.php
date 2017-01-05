@@ -2,12 +2,13 @@
 
 namespace Rx\React;
 
-use React\EventLoop\LoopInterface;
 use React\Stream\Stream;
 use Rx\Disposable\BinaryDisposable;
 use Rx\Disposable\CallbackDisposable;
+use Rx\DisposableInterface;
 use Rx\ObserverInterface;
 use Rx\Subject\Subject;
+use WyriHaximus\React\AsyncInteropLoop\AsyncInteropLoop;
 
 class StreamSubject extends Subject
 {
@@ -19,12 +20,11 @@ class StreamSubject extends Subject
      * StreamSubject constructor.
      *
      * @param resource $resource
-     * @param LoopInterface|null $loop
      */
-    public function __construct($resource, LoopInterface $loop = null)
+    public function __construct($resource)
     {
 
-        $loop = $loop ?: \EventLoop\getLoop();
+        $loop = new AsyncInteropLoop();
 
         $this->stream = new Stream($resource, $loop);
 
@@ -49,7 +49,7 @@ class StreamSubject extends Subject
         parent::onCompleted();
     }
 
-    public function subscribe(ObserverInterface $observer, $scheduler = null)
+    public function _subscribe(ObserverInterface $observer): DisposableInterface
     {
 
         $this->stream->on('data', function ($data) use ($observer) {
@@ -65,7 +65,7 @@ class StreamSubject extends Subject
             $observer->onCompleted();
         });
 
-        $disposable = parent::subscribe($observer, $scheduler);
+        $disposable = parent::_subscribe($observer);
 
         return new BinaryDisposable($disposable, new CallbackDisposable(function () use ($observer) {
             $this->removeObserver($observer);

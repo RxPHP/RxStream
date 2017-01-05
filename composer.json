@@ -29,9 +29,10 @@
     }
   },
   "require": {
-    "voryx/event-loop": "^0.2.0",
+    "php": "^7.0",
+    "voryx/event-loop": "^2.0.1",
     "react/stream": "^0.4.3",
-    "reactivex/rxphp": "^1.0.0",
-    "rx/operator-extras": "^0.1.0"
+    "reactivex/rxphp": "2.x-dev",
+    "rx/operator-extras": "^2.0.0"
   }
 }

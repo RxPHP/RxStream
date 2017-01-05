@@ -6,6 +6,7 @@ use React\EventLoop\LoopInterface;
 use Rx\Observable;
 use Rx\Observer\CallbackObserver;
 use Rx\React\FromFileObservable;
+use WyriHaximus\React\AsyncInteropLoop\AsyncInteropLoop;
 
 class FromFileObservableTest extends \PHPUnit_Framework_TestCase
 {
@@ -16,13 +17,13 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
     public function fromFile_basic()
     {
         /** @var LoopInterface $loop */
-        $loop     = \EventLoop\getLoop();
+        $loop     = new AsyncInteropLoop();
         $source   = new FromFileObservable(__DIR__ . '/../test.txt');
         $result   = false;
         $complete = false;
         $error    = false;
 
-        $source->subscribe(new CallbackObserver(
+        $source->subscribe(
             function ($value) use (&$result) {
                 $result = $value;
             },
@@ -32,12 +33,12 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
             function () use (&$complete) {
                 $complete = true;
             }
-        ));
+        );
 
 
         $loop->tick();
 
-        $this->assertEquals("1 2 3 4 5", $result);
+        $this->assertEquals('1 2 3 4 5', $result);
         $this->assertTrue($complete);
         $this->assertFalse($error);
 
@@ -49,13 +50,13 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
     public function fromFile_missing_file()
     {
         /** @var LoopInterface $loop */
-        $loop     = \EventLoop\getLoop();
+        $loop     = new AsyncInteropLoop();
         $source   = new FromFileObservable(__DIR__ . '/../nofile.txt');
         $result   = false;
         $complete = false;
         $error    = false;
 
-        $source->subscribe(new CallbackObserver(
+        $source->subscribe(
             function ($value) use (&$result) {
                 $result = $value;
             },
@@ -65,7 +66,7 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
             function () use (&$complete) {
                 $complete = true;
             }
-        ));
+        );
 
 
         $loop->tick();
@@ -83,18 +84,18 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
     {
         //Create a 10k temp file
         $temp = tmpfile();
-        fwrite($temp, str_repeat("1", 10000));
+        fwrite($temp, str_repeat('1', 150000));
         $meta_data = stream_get_meta_data($temp);
-        $filename  = $meta_data["uri"];
+        $filename  = $meta_data['uri'];
 
         /** @var LoopInterface $loop */
-        $loop     = \EventLoop\getLoop();
+        $loop     = new AsyncInteropLoop();
         $source   = new FromFileObservable($filename);
         $result   = false;
         $complete = false;
         $error    = false;
 
-        $source->subscribe(new CallbackObserver(
+        $source->subscribe(
             function ($value) use (&$result) {
                 $result = $value;
             },
@@ -104,26 +105,26 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
             function () use (&$complete) {
                 $complete = true;
             }
-        ));
+        );
 
 
         $loop->tick();
 
-        $this->assertEquals("4096", strlen($result));
+        $this->assertEquals("65536", strlen($result));
         $this->assertFalse($complete);
         $this->assertFalse($error);
 
 
         $loop->tick();
 
-        $this->assertEquals("4096", strlen($result));
+        $this->assertEquals("65536", strlen($result));
         $this->assertFalse($complete);
         $this->assertFalse($error);
 
 
         $loop->tick();
 
-        $this->assertEquals("1808", strlen($result));
+        $this->assertEquals("18928", strlen($result));
         $this->assertTrue($complete);
         $this->assertFalse($error);
     }
