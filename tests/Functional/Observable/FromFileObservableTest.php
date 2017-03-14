@@ -3,10 +3,7 @@
 namespace Rx\React\Tests\Functional\Observable;
 
 use React\EventLoop\LoopInterface;
-use Rx\Observable;
-use Rx\Observer\CallbackObserver;
 use Rx\React\FromFileObservable;
-use WyriHaximus\React\AsyncInteropLoop\AsyncInteropLoop;
 
 class FromFileObservableTest extends \PHPUnit_Framework_TestCase
 {
@@ -17,7 +14,7 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
     public function fromFile_basic()
     {
         /** @var LoopInterface $loop */
-        $loop     = new AsyncInteropLoop();
+        $loop     = \EventLoop\getLoop();
         $source   = new FromFileObservable(__DIR__ . '/../test.txt');
         $result   = false;
         $complete = false;
@@ -50,7 +47,7 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
     public function fromFile_missing_file()
     {
         /** @var LoopInterface $loop */
-        $loop     = new AsyncInteropLoop();
+        $loop     = \EventLoop\getLoop();
         $source   = new FromFileObservable(__DIR__ . '/../nofile.txt');
         $result   = false;
         $complete = false;
@@ -89,7 +86,7 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
         $filename  = $meta_data['uri'];
 
         /** @var LoopInterface $loop */
-        $loop     = new AsyncInteropLoop();
+        $loop     = \EventLoop\getLoop();
         $source   = new FromFileObservable($filename);
         $result   = false;
         $complete = false;

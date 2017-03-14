@@ -8,11 +8,9 @@ use Rx\Disposable\CallbackDisposable;
 use Rx\DisposableInterface;
 use Rx\ObserverInterface;
 use Rx\Subject\Subject;
-use WyriHaximus\React\AsyncInteropLoop\AsyncInteropLoop;
 
 class StreamSubject extends Subject
 {
-
     /** @var \React\Stream\Stream */
     private $stream;
 
@@ -23,27 +21,22 @@ class StreamSubject extends Subject
      */
     public function __construct($resource)
     {
-
-        $loop = new AsyncInteropLoop();
+        $loop = \EventLoop\getLoop();
 
         $this->stream = new Stream($resource, $loop);
-
     }
 
     public function onNext($data)
     {
-
         if (!$this->stream->isWritable()) {
             throw new \Exception('Stream must be writable');
         }
 
         $this->stream->write($data);
-
     }
 
     public function onCompleted()
     {
-
         $this->stream->end();
 
         parent::onCompleted();
@@ -51,7 +44,6 @@ class StreamSubject extends Subject
 
     public function _subscribe(ObserverInterface $observer): DisposableInterface
     {
-
         $this->stream->on('data', function ($data) use ($observer) {
             $observer->onNext($data);
         });
@@ -75,12 +67,10 @@ class StreamSubject extends Subject
 
     public function dispose()
     {
-
         if (!$this->hasObservers()) {
             parent::dispose();
             $this->stream->end();
-        };
-
+        }
     }
 
     /**
