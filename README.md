@@ -20,7 +20,7 @@ This library is a wrapper around the [ReactPHP](https://github.com/reactphp/stre
             $row[0] = preg_replace('/\d+/u', '', $row[0]);
             return $row;
         })
-        ->subscribe(new \Rx\Observer\CallbackObserver(
+        ->subscribe(
             function ($data) {
                 echo $data[0] . "\n";
             },
@@ -30,7 +30,7 @@ This library is a wrapper around the [ReactPHP](https://github.com/reactphp/stre
             function () {
                 echo "done\n";
             }
-        ));
+        );
     
 ```
 
