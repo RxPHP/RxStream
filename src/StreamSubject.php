@@ -6,52 +6,44 @@ use React\EventLoop\LoopInterface;
 use React\Stream\Stream;
 use Rx\Disposable\BinaryDisposable;
 use Rx\Disposable\CallbackDisposable;
+use Rx\DisposableInterface;
 use Rx\ObserverInterface;
 use Rx\Subject\Subject;
 
 class StreamSubject extends Subject
 {
-
-    /** @var \React\Stream\Stream */
     private $stream;
 
     /**
      * StreamSubject constructor.
-     *
-     * @param resource $resource
+     * @param $resource
      * @param LoopInterface|null $loop
      */
     public function __construct($resource, LoopInterface $loop = null)
     {
-
         $loop = $loop ?: \EventLoop\getLoop();
 
         $this->stream = new Stream($resource, $loop);
-
     }
 
     public function onNext($data)
     {
-
         if (!$this->stream->isWritable()) {
             throw new \Exception('Stream must be writable');
         }
 
         $this->stream->write($data);
-
     }
 
     public function onCompleted()
     {
-
         $this->stream->end();
 
         parent::onCompleted();
     }
 
-    public function subscribe(ObserverInterface $observer, $scheduler = null)
+    public function _subscribe(ObserverInterface $observer): DisposableInterface
     {
-
         $this->stream->on('data', function ($data) use ($observer) {
             $observer->onNext($data);
         });
@@ -65,7 +57,7 @@ class StreamSubject extends Subject
             $observer->onCompleted();
         });
 
-        $disposable = parent::subscribe($observer, $scheduler);
+        $disposable = parent::_subscribe($observer);
 
         return new BinaryDisposable($disposable, new CallbackDisposable(function () use ($observer) {
             $this->removeObserver($observer);
@@ -75,18 +67,13 @@ class StreamSubject extends Subject
 
     public function dispose()
     {
-
         if (!$this->hasObservers()) {
             parent::dispose();
             $this->stream->end();
-        };
-
+        }
     }
 
-    /**
-     * @return Stream
-     */
-    public function getStream()
+    public function getStream(): Stream
     {
         return $this->stream;
     }
