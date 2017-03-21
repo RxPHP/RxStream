@@ -2,6 +2,7 @@
 
 namespace Rx\React;
 
+use React\EventLoop\LoopInterface;
 use React\Stream\Stream;
 use Rx\Disposable\CallbackDisposable;
 use Rx\DisposableInterface;
@@ -9,30 +10,23 @@ use Rx\Operator\CutOperator;
 use Rx\Observable;
 use Rx\ObserverInterface;
 
-
 class FromFileObservable extends Observable
 {
-    /** @var  string */
     private $fileName;
-
-    /** @var  string */
     private $mode;
+    private $loop;
 
-    public function __construct($fileName, $mode = 'r')
+    public function __construct(string $fileName, string $mode = 'r', LoopInterface $loop = null)
     {
         $this->fileName = $fileName;
         $this->mode     = $mode;
+        $this->loop     = $loop ?: \EventLoop\getLoop();
     }
 
-    /**
-     * @param ObserverInterface $observer
-     * @return \Rx\Disposable\CompositeDisposable|\Rx\DisposableInterface
-     */
     public function _subscribe(ObserverInterface $observer): DisposableInterface
     {
-
         try {
-            $stream = new StreamSubject(fopen($this->fileName, $this->mode));
+            $stream = new StreamSubject(fopen($this->fileName, $this->mode), $this->loop);
 
             return $stream->subscribe($observer);
 
@@ -49,11 +43,8 @@ class FromFileObservable extends Observable
 
     /**
      * Cuts the stream based upon a delimiter.
-     *
-     * @param string $lineEnd
-     * @return Observable\AnonymousObservable
      */
-    public function cut($lineEnd = PHP_EOL)
+    public function cut(string $lineEnd = PHP_EOL): Observable
     {
         return $this->lift(function () use ($lineEnd) {
             return new CutOperator($lineEnd);

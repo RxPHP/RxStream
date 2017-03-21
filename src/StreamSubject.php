@@ -2,6 +2,7 @@
 
 namespace Rx\React;
 
+use React\EventLoop\LoopInterface;
 use React\Stream\Stream;
 use Rx\Disposable\BinaryDisposable;
 use Rx\Disposable\CallbackDisposable;
@@ -11,17 +12,16 @@ use Rx\Subject\Subject;
 
 class StreamSubject extends Subject
 {
-    /** @var \React\Stream\Stream */
     private $stream;
 
     /**
      * StreamSubject constructor.
-     *
-     * @param resource $resource
+     * @param $resource
+     * @param LoopInterface|null $loop
      */
-    public function __construct($resource)
+    public function __construct($resource, LoopInterface $loop = null)
     {
-        $loop = \EventLoop\getLoop();
+        $loop = $loop ?: \EventLoop\getLoop();
 
         $this->stream = new Stream($resource, $loop);
     }
@@ -73,10 +73,7 @@ class StreamSubject extends Subject
         }
     }
 
-    /**
-     * @return Stream
-     */
-    public function getStream()
+    public function getStream(): Stream
     {
         return $this->stream;
     }
