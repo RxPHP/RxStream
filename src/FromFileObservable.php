@@ -26,7 +26,7 @@ class FromFileObservable extends Observable
     public function _subscribe(ObserverInterface $observer): DisposableInterface
     {
         try {
-            $stream = new StreamSubject(fopen($this->fileName, $this->mode), $this->loop);
+            $stream = new StreamSubject(@fopen($this->fileName, $this->mode), $this->loop);
 
             return $stream->subscribe($observer);
 
