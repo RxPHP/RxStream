@@ -3,8 +3,9 @@
 namespace Rx\React;
 
 use React\EventLoop\LoopInterface;
-use React\Stream\Stream;
+use React\Stream\ReadableResourceStream;
 use Rx\Disposable\CallbackDisposable;
+use Rx\Disposable\EmptyDisposable;
 use Rx\DisposableInterface;
 use Rx\Operator\CutOperator;
 use Rx\Observable;
@@ -12,37 +13,54 @@ use Rx\ObserverInterface;
 
 class FromFileObservable extends Observable
 {
+
     private $fileName;
-    private $mode;
+
     private $loop;
 
-    public function __construct(string $fileName, string $mode = 'r', LoopInterface $loop = null)
+    public function __construct(string $fileName, LoopInterface $loop = null)
     {
         $this->fileName = $fileName;
-        $this->mode     = $mode;
         $this->loop     = $loop ?: \EventLoop\getLoop();
     }
 
     public function _subscribe(ObserverInterface $observer): DisposableInterface
     {
         try {
-            $stream = new StreamSubject(@fopen($this->fileName, $this->mode), $this->loop);
+            $stream = new ReadableResourceStream(@fopen($this->fileName, 'rb'), $this->loop);
 
-            return $stream->subscribe($observer);
-
-        } catch (\Exception $e) {
-            $observer->onError($e);
-
-            return new CallbackDisposable(function () use (&$stream) {
-                if ($stream instanceof Stream) {
-                    $stream->close();
-                }
+            $stream->on('data', function ($data) use ($observer) {
+                $observer->onNext($data);
             });
+
+            $stream->on('error', function (\Throwable $e) use ($observer) {
+                $observer->onError($e);
+            });
+
+            $stream->on('close', function () use ($observer) {
+                $observer->onCompleted();
+            });
+
+            $stream->on('end', function () use ($observer) {
+                $observer->onCompleted();
+            });
+
+            return new CallbackDisposable(function () use ($stream) {
+                $stream->close();
+            });
+
+        } catch (\Throwable $e) {
+            $observer->onError($e);
+            return new EmptyDisposable();
         }
     }
 
     /**
      * Cuts the stream based upon a delimiter.
+     *
+     * @param string $lineEnd
+     *
+     * @return \Rx\Observable
      */
     public function cut(string $lineEnd = PHP_EOL): Observable
     {

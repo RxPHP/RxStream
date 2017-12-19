@@ -3,7 +3,7 @@
 namespace Rx\React;
 
 use React\EventLoop\LoopInterface;
-use React\Stream\Stream;
+use React\Stream\DuplexResourceStream;
 use Rx\Disposable\BinaryDisposable;
 use Rx\Disposable\CallbackDisposable;
 use Rx\DisposableInterface;
@@ -23,7 +23,7 @@ class StreamSubject extends Subject
     {
         $loop = $loop ?: \EventLoop\getLoop();
 
-        $this->stream = new Stream($resource, $loop);
+        $this->stream = new DuplexResourceStream($resource, $loop);
     }
 
     public function onNext($data)
@@ -73,7 +73,7 @@ class StreamSubject extends Subject
         }
     }
 
-    public function getStream(): Stream
+    public function getStream(): DuplexResourceStream
     {
         return $this->stream;
     }

@@ -2,10 +2,32 @@
 
 namespace Rx\React;
 
-class ToFileObserver extends StreamSubject
+use React\EventLoop\LoopInterface;
+use React\Stream\WritableResourceStream;
+use Rx\ObserverInterface;
+
+class ToFileObserver implements ObserverInterface
 {
-    public function __construct(string $fileName)
+    private $stream;
+
+    public function __construct(string $fileName, LoopInterface $loop = null)
     {
-        parent::__construct(@fopen($fileName, 'wb'));
+        $loop         = $loop ?: \EventLoop\getLoop();
+        $this->stream = new WritableResourceStream(@fopen($fileName, 'wb'), $loop);
+    }
+
+    public function onCompleted()
+    {
+        $this->stream->end();
+    }
+
+    public function onError(\Throwable $error)
+    {
+        $this->stream->close();
+    }
+
+    public function onNext($value)
+    {
+        $this->stream->write($value);
     }
 }

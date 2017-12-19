@@ -32,8 +32,7 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
             }
         );
 
-
-        $loop->tick();
+        $loop->run();
 
         $this->assertEquals('1 2 3 4 5', $result);
         $this->assertTrue($complete);
@@ -65,7 +64,6 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
             }
         );
 
-
         $loop->tick();
 
         $this->assertFalse($result);
@@ -79,6 +77,7 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
      */
     public function fromFile_exceed_buffer()
     {
+
         //Create a 10k temp file
         $temp = tmpfile();
         fwrite($temp, str_repeat('1', 150000));
@@ -104,22 +103,7 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
             }
         );
 
-
-        $loop->tick();
-
-        $this->assertEquals("65536", strlen($result));
-        $this->assertFalse($complete);
-        $this->assertFalse($error);
-
-
-        $loop->tick();
-
-        $this->assertEquals("65536", strlen($result));
-        $this->assertFalse($complete);
-        $this->assertFalse($error);
-
-
-        $loop->tick();
+        $loop->run();
 
         $this->assertEquals("18928", strlen($result));
         $this->assertTrue($complete);
