@@ -64,7 +64,10 @@ class FromFileObservableTest extends \PHPUnit_Framework_TestCase
             }
         );
 
-        $loop->tick();
+        $loop->futureTick(function () use ($loop) {
+            $loop->stop();
+        });
+        $loop->run();
 
         $this->assertFalse($result);
         $this->assertFalse($complete);
