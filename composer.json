@@ -36,7 +36,7 @@
   "require": {
     "php": "^7.0",
     "voryx/event-loop": "^3.0 || ^2.0",
-    "react/stream": "^1.0",
+    "react/stream": "^1.0 || ^0.7.1",
     "reactivex/rxphp": "^2.0",
     "rx/operator-extras": "^2.0"
   },
